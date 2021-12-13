@@ -1,0 +1,96 @@
+---
+title: "Faktoren mit factors"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Faktoren mit factors
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+```
+
+-   kreiren von Faktoren
+
+-   nominale variablen sind Faktoren
+
+```{r}
+string = c("Dez", "Feb", "Jan", "Apr")
+sort(string)
+
+monate_level = c("Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez")
+
+# factor
+faktor = factor(string, levels = monate_level)
+sort(faktor)
+
+# Social Survey
+gss_cat %>%
+  count(race)
+  
+ggplot(gss_cat, aes(race)) +
+  geom_bar()
+```
+
+-    Reihenfolge von Faktoren
+
+```{r}
+relig = gss_cat %>%
+  group_by(relig) %>%
+  summarize(avg_age = mean(age, na.rm = T),
+            avg_tvhours = mean(tvhours, na.rm = T),
+            n = n())
+relig
+
+ggplot(relig, aes(avg_tvhours, relig)) +
+  geom_point()
+
+ggplot(relig, aes(avg_tvhours, fct_reorder(relig, avg_tvhours))) +
+  geom_point()
+
+```
+
+-   Neu kodieren von Faktoren
+
+```{r}
+gss_cat %>%
+  count(partyid)
+
+gss_cat %>%
+  mutate(partyid = fct_recode(partyid,
+                              "Republikaner, stark" = "Strong republican",
+                              "Republikaner, schwach" = "Not str republican",
+                              "Unhabhängig, nahe Rep." = "Ind,near rep",
+                              "Unhabhängig, nahe Dem." = "Ind,near dem",
+                              "Demokrat, schwach" = "Not strong democrat",
+                              "Demokrat, stark" = "Strong democrat")) %>%
+  count(partyid)
+
+```
+
+-   Zusammenfassen von Faktoren
+
+```{r}
+gss_cat %>%
+  mutate(partyid = fct_collapse(partyid,
+                                other = c("No answer", "Don't know", "Other party"),
+                                rep = c("Strong republican", "Not str republican"),
+                                ind = c("Ind,near rep", "Independent", "Ind,near dem"),
+                                dem = c("Not str democrat", "Strong democrat"))) %>%
+  count(partyid)
+```
+
+-   Zusammenballen von Faktoren
+
+```{r}
+gss_cat %>%
+  mutate(relig = fct_lump(relig, n = 10)) %>% # ballt alle 15 Religionen zu 10 zusammen, fügt die Religionen mit den wenigsten Anhängern zu "Other" hinzu
+  count(relig, sort = TRUE)
+
+gss_cat %>%
+  count(relig, sort = TRUE) 
+```
