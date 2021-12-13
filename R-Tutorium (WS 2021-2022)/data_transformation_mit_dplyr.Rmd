@@ -1,0 +1,110 @@
+## Data transformation mit dplyr
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+library(nycflights13)
+```
+
+-   jede Aktion nur auf data.frames
+
+```{r}
+flights
+```
+
+-   filter
+
+```{r}
+flights %>%
+  filter(month == 1, day == 1) # und
+
+flights %>%
+  filter(month == 11 | month == 12) # oder
+
+# auch Möglichkeit das zu lösen, %in% :
+flights %>%
+  filter(month %in% c(11, 12))
+
+flights %>%
+  filter(carrier == "AA" | carrier == "DL") # filter nur flüge von American Airlines oder Delta
+
+flights %>%
+  filter(dep_delay <= 0, arr_delay > 120) # filter nur flüge wo der Abflug zu früh stattgefunden hat, aber zu spät angekommen sind
+```
+
+-   arrange
+
+```{r}
+flights %>%
+  arrange(dep_time) # Abflugszeiten aufsteigend
+
+flights %>%
+  arrange(desc(dep_time)) # Abflugszeiten absteigend
+
+flights %>%
+  arrange(desc(month), dep_time) # Abflugszeiten absteigend nach Monat 
+```
+
+-   select
+
+```{r}
+flights %>%
+  dplyr::select(year, month) # zeigt nur Spalte year und month an
+
+flights %>%
+  dplyr::select(-(year:dep_time)) # zeigt alle Spalten, außer year bis dep_time an
+```
+
+-   rename
+
+```{r}
+flights %>%
+  rename(arriving = arr_time) # benennt Spaltennamen arr_time in arriving um
+```
+
+-   mutate
+
+```{r}
+flights %>%
+  dplyr::select(distance, air_time) %>%
+  mutate(speed = distance/air_time * 60) # erzeugt neue Spalte mit Ergebniss aus distance/air_time * 60
+```
+
+-   summarize und count
+
+```{r}
+flights %>%
+  summarize(delay_avg = mean(dep_delay, na.rm = TRUE)) # errechnet Durchschnittswert von dep_delay
+
+flights %>%
+  # gruppiere month, wenn du es grupiert hast...
+  group_by(month) %>%
+  # ...errechne Mittelwert aus dep_delay und die Standartabweichung von dep_delay...
+  summarize(del_avg = mean(dep_delay, na.rm = TRUE), del_sd = sd(dep_delay, na.rm = TRUE), 
+             # ...sowie den Median (Zentralwert) von dep_delay
+            del_med = median(dep_delay, na.rm = TRUE))
+
+# zähle wie oft jede Airline pro Monat geflogen ist
+flights %>%
+  group_by(month) %>%
+  count(carrier)
+```
+
+-   join
+
+```{r}
+airlines
+
+flights %>% 
+  dplyr::select(carrier, dep_time) %>% # Spalten Carrier und Abflugszeit
+  left_join(airlines, by = "carrier") # Füge alle Spalten nach "Carrier" in Airlines zu
+  # keine Ahnung was left_join genau macht...
+planes
+
+flights %>%
+  dplyr::select(tailnum, carrier, dep_time, arr_time) %>%
+  left_join(planes, by = "tailnum") # Füge alle Spalten nach tailnum in planes zu
+  # keine Ahnung was left_join genau macht... 
+
+flights
+```

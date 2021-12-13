@@ -1,0 +1,133 @@
+## Strings mit stringr
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+string1 = "Hello"
+string2 = "Bye"
+
+mu = "\u03BC"
+
+ch_vector = c(string1, string2, mu)
+```
+
+-   länge
+
+```{r}
+str_length(ch_vector)
+```
+
+-   kombinieren von strings
+
+```{r}
+str_c(string1, string2)
+
+str_c(string1, string2, sep = " ")
+str_c(string1, string2, sep = " and ")
+
+str_c("prefix-", c(string1, string2), "-suffix")
+```
+
+-   Subsetting von strings
+
+```{r}
+x = c("Apple", "Banana", "Pear")
+
+str_sub(x, start = 1, end = 3) # zeig charakter 1-3 von jedem Element in String Vektor
+
+str_sub(x, start = 1, end = 1) = tolower(str_sub(x, start = 1, end = 1)) # ersten Buchstaben von jedem char in lowercase
+x
+str_sub(x, 2, 6) = toupper(str_sub(x, 2, 6))
+x
+x = c(x, "eggplant")
+x
+str_sub(x, 2, 6) = tolower(str_sub(x, 2, 6))
+x
+str_sort(x, locale = "en") # sortiert nach local alphabet
+str_sort(x, locale = "haw")
+```
+
+-   Mustererkennung mithilfe regulärer Ausdrücke ( regular expressions )\
+
+```{r}
+str_view(x, pattern = "an")
+
+str_view(x, pattern = "a")
+
+str_view(c("abc", "a.c", "bef"), "a.c")
+
+str_view(c("abc", "a.c", "bef"), "a\\.c")
+
+# ^stimmt der Anfang des Strings überein
+# $stimmt das Ende des regulären Ausdrucks überein
+
+str_view(x, "^a")
+str_view(x, "a$")
+
+# \d entspricht jeder Ziffer
+# \s entsricht jedem whitespace, also jeder Freistelle im Text
+# [abc] entspricht a, b oder c
+# [^abc] entspricht allem außer a, b, oder c
+
+str_view(c("grey", "gray"), "gr(e|a)y")
+
+```
+
+-   str_detect - entsprechenden Ausdruck wiederfinden
+
+```{r}
+head(str_detect(words, "e"))
+
+sum(str_detect(words, "^m")) # wie viele Wörter fangen mit m an
+
+mean(str_detect(words, "[aeiou]$")) # wie viele Wörter enden im Mittel mit einem Vokal
+
+kein_vokal = !str_detect(words, "[aeiou]") # Gibt es Wörter die gar kein Vokal enthalten
+sum(kein_vokal)
+words[kein_vokal]
+
+str_subset(words, "^[^aeiou]+$") # Gibt es Wörter die kein Vokal enthalten ( mit regular expressions )
+str_subset(words, "a$") # zeige Wörter die a am Ende haben
+
+str_count(x, "a") # wie viele a sind in einem Wört
+
+mean(str_count(words, "[aeiou]")) # wie viele Vokale sind durchschnittlich in den Wörtern enthalten
+```
+
+-   strings in dataframe (tibble)
+
+```{r}
+df = tibble(word = words, i = seq_along(word))
+df
+df %>%
+  mutate(vokale = str_count(word, "[aeiou]"), konsonanten = str_count(word, "[^aeiou]"))
+```
+
+-   Sätze und die Identifizierung von Artikeln
+
+```{r}
+#head(sentences)
+
+article = "a|the"
+has_article = sentences %>%
+  str_subset(article)
+head(has_article)
+
+# zeige ( extrahiere ) alle Artikel
+head(has_article) %>%
+  str_extract(article) 
+```
+
+-   regex()
+
+```{r}
+bananas = c("Banana", "banana", "bANANA", "BANANA")
+
+bananas %>%
+  str_view("banana")
+
+bananas %>%
+  str_view(regex("banana", ignore_case = TRUE))
+```
